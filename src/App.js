@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route } from "react-router-dom";
 import ListProjects from './pages/ListProjects';
 import Login from './pages/Login/Login';
 import LoginCallback from './pages/Login/LoginCallback';
+import LoggedTemplate from './templates/LoggedTemplate';
 
 class App extends Component {
   render() {
@@ -12,7 +13,10 @@ class App extends Component {
        <div>
         <Route exact path="/login" component={Login} />
         <Route exact path="/login/callback" component={LoginCallback} />
-        <Route exact path="/" component={ListProjects} />
+      
+        <LoggedTemplate>
+          <Route exact path="/" component={ListProjects} />
+        </LoggedTemplate>
        </div>
 
       </Router>

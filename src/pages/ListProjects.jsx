@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
-import {Redirect} from 'react-router-dom'
-import Axios from 'axios';
 import back from '../requests/back';
+import { getToken } from '../login/login-service';
 
 export default class ListProjects extends Component {
 
@@ -10,7 +9,7 @@ export default class ListProjects extends Component {
     loading: false
   }
 
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.getUserRepositories = this.getUserRepositories.bind(this)
   }
@@ -19,44 +18,44 @@ export default class ListProjects extends Component {
     this.getUserRepositories()
   }
 
-  async getUserRepositories () {
-    this.setState({repositories: []})
-    const token = localStorage.getItem('access_token')
+  async getUserRepositories() {
+    this.setState({ repositories: [] })
+    const token = getToken()
 
     try {
-      this.setState({loading: true})
+      this.setState({ loading: true })
 
       const resp = await back.get(`/repositories?token=${token}`)
-      this.setState({repositories: resp.data})
+      this.setState({ repositories: resp.data })
 
-      this.setState({loading: false})
-    } catch (error) {   
+      this.setState({ loading: false })
+    } catch (error) {
       alert('Usuário não existe')
 
-      this.setState({loading: false})
+      this.setState({ loading: false })
     }
   }
 
-  render () {
-      if (!localStorage.getItem('access_token')) {
-        return <Redirect to="/login" />
-      }
+  logout() {
+    localStorage.removeItem('access_token')
+  }
 
-      return (
-        <div>
-          { this.state.loading ? <p>Carregando</p> : null }
+  render() {
+    return (
+      <div>
+        {this.state.loading ? <p>Carregando</p> : null}
 
-          <ul>
-            {this.state.repositories.map((repo, idx) => {
-              return (
-                <li key={idx}>
-                  <a href={repo.url} target="_blank">{repo.name}</a>
-                </li>
-              )
-            })}
-          </ul>
-        </div>
-      )
+        <ul>
+          {this.state.repositories.map((repo, idx) => {
+            return (
+              <li key={idx}>
+                <a href={repo.url} target="_blank">{repo.name}</a>
+              </li>
+            )
+          })}
+        </ul>
+      </div>
+    )
   }
 
 }

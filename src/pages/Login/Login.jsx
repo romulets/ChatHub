@@ -1,18 +1,18 @@
 import React, { Component } from 'react';
-import {Redirect} from 'react-router-dom'
+import { Redirect } from 'react-router-dom'
 import PropTypes from 'prop-types';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import LockIcon from '@material-ui/icons/LockOutlined';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import withStyles from '@material-ui/core/styles/withStyles';
+import { hasToken } from '../../login/login-service';
 
 const styles = theme => ({
   layout: {
     width: 'auto',
-    display: 'block', // Fix IE11 issue.
+    display: 'block',
     marginLeft: theme.spacing.unit * 3,
     marginRight: theme.spacing.unit * 3,
     [theme.breakpoints.up(400 + theme.spacing.unit * 3 * 2)]: {
@@ -30,29 +30,31 @@ const styles = theme => ({
   },
   avatar: {
     margin: theme.spacing.unit,
-    backgroundColor: theme.palette.secondary.main,
+    backgroundColor: '#fff',
   },
   form: {
-    width: '100%', // Fix IE11 issue.
+    width: '100%',
     marginTop: theme.spacing.unit,
   },
   submit: {
     marginTop: theme.spacing.unit * 3,
   },
+  logo: {
+    height: '50px'
+  },
+  noStyle: {
+    textDecoration: 'none'
+  }
 });
 
 class SignIn extends Component {
 
   GITHUB_CLIENT_ID = '06769512846394835010'
 
-  componentDidMount() {
-
-  }
-
   render() {
     const { classes } = this.props
 
-    if (localStorage.getItem('access_token')) {
+    if (hasToken()) {
       return <Redirect to="/" />
     }
 
@@ -62,10 +64,11 @@ class SignIn extends Component {
         <main className={classes.layout}>
           <Paper className={classes.paper}>
             <Avatar className={classes.avatar}>
-              <LockIcon />
+              <img src='/images/github-logo.svg' alt='github logo' className={classes.logo} />
             </Avatar>
-            <Typography variant="headline">Sign in</Typography>
-            <a href={`https://github.com/login/oauth/authorize?scope=user:email&client_id=${this.GITHUB_CLIENT_ID}`}>
+            <Typography variant="headline">ChatHub</Typography>
+
+            <a className={classes.noStyle} href={`https://github.com/login/oauth/authorize?scope=user:email&client_id=${this.GITHUB_CLIENT_ID}`}>
               <Button
                 fullWidth
                 variant="raised"
@@ -74,6 +77,7 @@ class SignIn extends Component {
                 Sign in with github
                     </Button>
             </a>
+
           </Paper>
         </main>
       </React.Fragment>
