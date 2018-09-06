@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Route } from "react-router-dom";
-import ListProjects from './pages/ListProjects';
+import Projects from './pages/Projects';
+import Threads from './pages/Threads';
+import Chat from './pages/Chat';
 import Login from './pages/Login/Login';
 import LoginCallback from './pages/Login/LoginCallback';
 import LoggedTemplate from './templates/LoggedTemplate';
@@ -15,7 +17,9 @@ class App extends Component {
         <Route exact path="/login/callback" component={LoginCallback} />
       
         <LoggedTemplate>
-          <Route exact path="/" component={ListProjects} />
+          <Route exact path="/projects" component={Projects} />
+          <Route exact path="/projects/:projectId/threads" component={Threads} />
+          <Route exact path="/projects/:projectId/threads/:threadId/chat" component={Chat} />
         </LoggedTemplate>
        </div>
 

@@ -1,9 +1,16 @@
 import React, { Component } from 'react'
+import { Link } from 'react-router-dom'
 import back from '../requests/back';
 import { getToken } from '../login/login-service';
-import { List, ListItem, ListItemText, Typography } from '@material-ui/core';
+import { List, ListItem, ListItemText, Typography, withStyles } from '@material-ui/core';
 
-export default class ListProjects extends Component {
+const styles = theme => ({
+  normalLink: {
+    textDecoration: 'none'
+  }
+})
+
+class Project extends Component {
 
   state = {
     repositories: [],
@@ -46,16 +53,20 @@ export default class ListProjects extends Component {
       return <Typography variant="body1">Carregando</Typography>
     }
 
+    const { classes } = this.props
+
     return (
       <div>
         <Typography variant="title">Projetos</Typography>
-        
+
         <List>
           {this.state.repositories.map((repo, idx) => {
             return (
-              <ListItem key={idx} button>
-                <ListItemText primary={repo.name} />
-              </ListItem>
+              <Link to={`/projects/${idx}/threads`} className={classes.normalLink}>
+                <ListItem key={idx} button>
+                  <ListItemText primary={repo.name} />
+                </ListItem>
+              </Link>
             )
           })}
         </List>
@@ -64,3 +75,5 @@ export default class ListProjects extends Component {
   }
 
 }
+
+export default withStyles(styles)(Project);
