@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import back from '../requests/back';
 import { getToken } from '../login/login-service';
+import { List, ListItem, ListItemText, Typography } from '@material-ui/core';
 
 export default class ListProjects extends Component {
 
@@ -41,19 +42,23 @@ export default class ListProjects extends Component {
   }
 
   render() {
+    if (this.state.loading) {
+      return <Typography variant="body1">Carregando</Typography>
+    }
+
     return (
       <div>
-        {this.state.loading ? <p>Carregando</p> : null}
-
-        <ul>
+        <Typography variant="title">Projetos</Typography>
+        
+        <List>
           {this.state.repositories.map((repo, idx) => {
             return (
-              <li key={idx}>
-                <a href={repo.url} target="_blank">{repo.name}</a>
-              </li>
+              <ListItem key={idx} button>
+                <ListItemText primary={repo.name} />
+              </ListItem>
             )
           })}
-        </ul>
+        </List>
       </div>
     )
   }
