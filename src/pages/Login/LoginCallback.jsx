@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { Redirect } from 'react-router-dom'
 import queryString from 'query-string'
 import back from "../../requests/back";
 import { setToken, hasToken } from "../../login/login-service";
@@ -18,19 +17,19 @@ export default class SignInCallback extends Component {
       const { code: access_token } = resp.data
       console.log('ACCESS_TOKEN ' + access_token)
       setToken(access_token)
-      window.location.reload(true)
+      window.location = '/'
     } catch (error) {
-      window.alert(error.data.message)
+      window.alert(error.data ? error.data.message : error.message)
       console.error(error)
     }
   }
 
   render() {
-    if (hasToken()) {
-      return <Redirect to="/" />
-    }
-
-    return <div />
+    return (
+      <div>
+        <p>Log In...</p>
+      </div>
+    )
   }
 
 }

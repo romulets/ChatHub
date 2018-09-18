@@ -6,16 +6,27 @@ import Chat from './pages/Chat';
 import Login from './pages/Login/Login';
 import LoginCallback from './pages/Login/LoginCallback';
 import LoggedTemplate from './templates/LoggedTemplate';
+import { hasToken } from './login/login-service';
 
 class App extends Component {
   render() {
+
+    if (!hasToken()) {
+      return (
+        <Router>
+          <div>
+            <Route exact path="/" component={Login} />
+            <Route exact path="/login" component={Login} />
+            <Route exact path="/login-callback" component={LoginCallback} />
+          </div>
+        </Router>
+      ) 
+    }
+
     return (
       <Router>
 
        <div>
-        <Route exact path="/login" component={Login} />
-        <Route exact path="/login-callback" component={LoginCallback} />
-      
         <LoggedTemplate>
           <Route exact path="/projects" component={Projects} />
           <Route exact path="/projects/:projectId/threads" component={Threads} />

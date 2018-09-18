@@ -1,19 +1,26 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
-import { withStyles, ListItem, ListItemText, Typography, List, Button } from '@material-ui/core';
+import { withStyles, ListItem, ListItemText, Typography, List, Button, TextField, Snackbar } from '@material-ui/core';
 import back from '../requests/back';
 
 const styles = theme => ({
 	normalLink: {
 		textDecoration: 'none'
-	}
+  },
+  threadNameField: {
+    width: '50%',
+    marginRight: '20px'
+  }
 })
 
 class Threads extends Component {
 
 	state = {
-		threads: [],
-		projectId: 0
+    threads: [],
+    threadName: '',
+    projectId: 0,
+    snackbarIsOpen: false,
+    snackbarMessage: ''
 	}
 
 	props = {}
@@ -22,12 +29,21 @@ class Threads extends Component {
 		super(props)
 		this.props = props
 		this.getProjectThreads = this.getProjectThreads.bind(this)
-		this.newThread = this.newThread.bind(this)
+    this.newThread = this.newThread.bind(this)
+    this.updateThreadName = this.updateThreadName.bind(this)
 	}
 
 	componentDidMount() {
 		this.getProjectThreads()
-	}
+  }
+  
+  updateThreadName ({target: { value }}) {
+    this.setState({threadName: value})
+  }
+
+  openSnackbar(snackbarMessage) {
+    this.setState({snackbarIsOpen: true, snackbarMessage })
+  }
 
 	async getProjectThreads() {
 		const projectId = this.props.match.params.projectId
@@ -43,17 +59,25 @@ class Threads extends Component {
 	}
 
 	async newThread(){
-		const newThreadName = prompt("Nomeie a nova thread")
+    const newThreadName = this.state.threadName.trim()
+    
+    if (newThreadName.length === 0) {
+      this.openSnackbar('Please provide a valid thread name')
+      return
+    }
 
 		const data = {
 				name: newThreadName,
 				projectId: this.state.projectId
 		}
 
+    this.setState({ threadName: '' })
+    this.openSnackbar('Saving thread')
+
 		await back.post(`/threads`, data)
-
-		this.getProjectThreads()
-
+    await this.getProjectThreads()
+    
+    this.openSnackbar('Thread saved!')
 	}
 
 	render() {
@@ -61,7 +85,20 @@ class Threads extends Component {
 		const projectId = this.props.match.params.projectId
 		return (
 			<div>
-				<Typography variant="title">Threads <Button variant="contained" color="primary" onClick={this.newThread}>Nova</Button></Typography>
+				<Typography variant="title">Threads </Typography>
+
+        <form>
+          <TextField 
+            className={classes.threadNameField} 
+            id="threadName" 
+            label="New thread name" 
+            margin="normal" 
+            onChange={this.updateThreadName} 
+            value={this.state.threadName}
+            error={this.state.threadName.trim().length === 0} /> 
+
+          <Button variant="contained" color="primary" onClick={this.newThread}>Create new thread</Button>
+        </form>
 
 				<List>
 					{this.state.threads.map((thread, id) => {
@@ -77,6 +114,19 @@ class Threads extends Component {
 					})}
 
 				</List>
+
+          <Snackbar
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'left',
+          }}
+          open={this.state.snackbarIsOpen}
+          autoHideDuration={6000}
+          onClose={this.handleClose}
+          ContentProps={{
+            'aria-describedby': 'message-id',
+          }}
+          message={this.state.snackbarMessage} />
 			</div>
 		)
 	}

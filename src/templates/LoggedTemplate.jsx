@@ -107,9 +107,8 @@ class Dashboard extends React.Component {
 
   logout() {
     removeToken()
-    this.setState({ redirectToLogin: true })
+    window.location = '/'
   }
-
 
   handleDrawerOpen = () => {
     this.setState({ open: true });
@@ -121,15 +120,6 @@ class Dashboard extends React.Component {
 
   render() {
     const { classes } = this.props;
-
-    console.log(this.props)
-
-    //window.location.pathname 
-
-    if (this.state.redirectToLogin || !hasToken()) {
-
-      return <Redirect to="/login" />
-    }
 
     return (
       <React.Fragment>
