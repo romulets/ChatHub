@@ -15,10 +15,12 @@ export default class SignInCallback extends Component {
 
     try {
       const resp = await back.post('/login', { code })
-      const { access_token } = resp.data
+      const { code: access_token } = resp.data
+      console.log('ACCESS_TOKEN ' + access_token)
       setToken(access_token)
       window.location.reload(true)
     } catch (error) {
+      window.alert(error.data.message)
       console.error(error)
     }
   }

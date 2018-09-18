@@ -122,7 +122,12 @@ class Dashboard extends React.Component {
   render() {
     const { classes } = this.props;
 
+    console.log(this.props)
+
+    //window.location.pathname 
+
     if (this.state.redirectToLogin || !hasToken()) {
+
       return <Redirect to="/login" />
     }
 

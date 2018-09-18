@@ -14,7 +14,7 @@ class App extends Component {
 
        <div>
         <Route exact path="/login" component={Login} />
-        <Route exact path="/login/callback" component={LoginCallback} />
+        <Route exact path="/login-callback" component={LoginCallback} />
       
         <LoggedTemplate>
           <Route exact path="/projects" component={Projects} />

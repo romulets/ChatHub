@@ -61,7 +61,9 @@ class Project extends Component {
 
         <List>
           {this.state.repositories.map((repo, idx) => {
+            console.log(repo)
             return (
+              
               <Link to={`/projects/${idx}/threads`} className={classes.normalLink}>
                 <ListItem key={idx} button>
                   <ListItemText primary={repo.name} />
