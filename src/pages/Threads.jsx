@@ -51,7 +51,7 @@ class Threads extends Component {
 		this.setState({ threads: [], projectId: projectId })
 
 		try {
-			const resp = await back.get(`/threads/${projectId}`)
+			const resp = await back.get(`/projects/${projectId}/threads`)
 			this.setState({ threads: resp.data })
 		} catch (error) {
 			alert("Erro ao consultar as threads do projeto")
@@ -99,7 +99,7 @@ class Threads extends Component {
             value={this.state.threadName}
             error={this.state.threadName.trim().length === 0} /> 
 
-          <Button variant="contained" color="primary" onClick={this.newThread}>Create new thread</Button>
+          <Button variant="contained" color="primary" onClick={this.updateThreadName}>Create new thread</Button>
         
 
 				<List>
