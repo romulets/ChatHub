@@ -7,7 +7,7 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import withStyles from '@material-ui/core/styles/withStyles';
-import { hasToken } from '../../login/login-service';
+import { hasUser } from '../../login/login-service';
 
 const styles = theme => ({
   layout: {
@@ -54,7 +54,7 @@ class SignIn extends Component {
   render() {
     const { classes } = this.props
 
-    if (hasToken()) {
+    if (hasUser()) {
       return <Redirect to="/" />
     }
 

@@ -6,12 +6,12 @@ import Chat from './pages/Chat';
 import Login from './pages/Login/Login';
 import LoginCallback from './pages/Login/LoginCallback';
 import LoggedTemplate from './templates/LoggedTemplate';
-import { hasToken } from './login/login-service';
+import { hasUser } from './login/login-service';
 
 class App extends Component {
   render() {
 
-    if (!hasToken()) {
+    if (!hasUser()) {
       return (
         <Router>
           <div>

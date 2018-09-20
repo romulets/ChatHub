@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
 import back from '../requests/back';
-import { getToken } from '../login/login-service';
+import { getUser } from '../login/login-service';
 import { List, ListItem, ListItemText, Typography, withStyles } from '@material-ui/core';
 
 const styles = theme => ({
@@ -28,7 +28,7 @@ class Project extends Component {
 
   async getUserRepositories() {
     this.setState({ repositories: [] })
-    const token = getToken()
+    const token = getUser()
 
     try {
       this.setState({ loading: true })

@@ -1,21 +1,20 @@
 
 
-const LOCAL_STORAGE_TOKEN = 'access_token'
+const LOCAL_STORAGE_USER = 'chathub_user'
 
-export function setToken(token) {
-    console.log('SET ' + token)
-    localStorage.setItem(LOCAL_STORAGE_TOKEN, token)
+export function setUser(user) {
+    localStorage.setItem(LOCAL_STORAGE_USER, JSON.stringify(user))
 }
 
-export function getToken() {
-    console.log('GET ' + localStorage.getItem(LOCAL_STORAGE_TOKEN))
-    return localStorage.getItem(LOCAL_STORAGE_TOKEN)
+export function getUser() {
+    const user = JSON.parse(localStorage.getItem(LOCAL_STORAGE_USER))
+    return user
 }
 
-export function hasToken() {
-    return getToken() !== null
+export function hasUser() {
+    return getUser() !== null
 }
 
-export function removeToken() {
-    localStorage.removeItem(LOCAL_STORAGE_TOKEN)
+export function removeUser() {
+    localStorage.removeItem(LOCAL_STORAGE_USER)
 }

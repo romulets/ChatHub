@@ -1,5 +1,4 @@
 import React from 'react';
-import { Redirect } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
@@ -14,8 +13,13 @@ import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
-import { removeToken, hasToken } from '../login/login-service';
-import { mailFolderListItems, otherMailFolderListItems } from './MenuItems';
+import { removeUser,getUser } from '../login/login-service';
+import { Avatar, Tooltip } from '@material-ui/core';
+import { Link } from 'react-router-dom'
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import InboxIcon from '@material-ui/icons/MoveToInbox';
 
 const drawerWidth = 240;
 
@@ -91,6 +95,19 @@ const styles = theme => ({
   tableContainer: {
     height: 320,
   },
+  avatar: {
+    marginRight: '15px',
+  },
+  avatarContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    marginTop: '20px',
+    marginBottom: '20px',
+    marginLeft: '15px',
+  },
+  menuItem: {
+    textDecoration: 'none'
+  }
 });
 
 class Dashboard extends React.Component {
@@ -106,7 +123,7 @@ class Dashboard extends React.Component {
   }
 
   logout() {
-    removeToken()
+    removeUser()
     window.location = '/'
   }
 
@@ -120,6 +137,8 @@ class Dashboard extends React.Component {
 
   render() {
     const { classes } = this.props;
+
+    const user = getUser()
 
     return (
       <React.Fragment>
@@ -144,9 +163,12 @@ class Dashboard extends React.Component {
               <Typography variant="title" color="inherit" noWrap className={classes.title}>
                 ChatHub
               </Typography>
-              <IconButton color="inherit" onClick={this.logout}>
-                <ExitToAppIcon />
-              </IconButton>
+
+              <Tooltip title="Logout">
+                <IconButton color="inherit" onClick={this.logout}>
+                  <ExitToAppIcon />
+                </IconButton>
+              </Tooltip>
             </Toolbar>
           </AppBar>
           <Drawer
@@ -162,9 +184,28 @@ class Dashboard extends React.Component {
               </IconButton>
             </div>
 
-            <List>{mailFolderListItems}</List>
+            <div className={classes.avatarContainer}>
+              <Avatar
+                  alt={user.name}
+                  src={user.avatarUrl}
+                  className={classes.avatar} />
+              <Typography variant="body2" color="inherit" noWrap className={classes.title}>
+                {user.name}
+              </Typography>
+            </div>
+            
             <Divider />
-            <List>{otherMailFolderListItems}</List>
+            <List>
+              <Link to="/projects" className={classes.menuItem}>
+                <ListItem button>
+                  <ListItemIcon>
+                    <InboxIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Your Projects" />
+                </ListItem>
+              </Link>
+            </List>
+            <Divider />
 
           </Drawer>
           <main className={classes.content}>
