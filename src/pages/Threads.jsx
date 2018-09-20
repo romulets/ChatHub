@@ -82,12 +82,14 @@ class Threads extends Component {
 
 	render() {
 		const { classes } = this.props
-		const projectId = this.props.match.params.projectId
+    const projectId = this.props.match.params.projectId
+    
+    console.log(this.state.threads)
 		return (
 			<div>
 				<Typography variant="title">Threads </Typography>
 
-        <form>
+        
           <TextField 
             className={classes.threadNameField} 
             id="threadName" 
@@ -98,10 +100,10 @@ class Threads extends Component {
             error={this.state.threadName.trim().length === 0} /> 
 
           <Button variant="contained" color="primary" onClick={this.newThread}>Create new thread</Button>
-        </form>
+        
 
 				<List>
-					{this.state.threads.map((thread, id) => {
+					{this.state.threads.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).map((thread, id) => {
 
 						return (
 							<Link to={`/projects/` + projectId + `/threads/` + thread._id + `/chat`} className={classes.normalLink}>
