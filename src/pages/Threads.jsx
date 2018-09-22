@@ -18,7 +18,7 @@ class Threads extends Component {
 	state = {
     threads: [],
     threadName: '',
-    projectId: 0,
+    repositoryId: 0,
     snackbarIsOpen: false,
     snackbarMessage: ''
 	}
@@ -46,12 +46,12 @@ class Threads extends Component {
   }
 
 	async getProjectThreads() {
-		const projectId = this.props.match.params.projectId
+		const repositoryId = this.props.match.params.repositoryId
 
-		this.setState({ threads: [], projectId: projectId })
+		this.setState({ threads: [], repositoryId: repositoryId })
 
 		try {
-			const resp = await back.get(`/projects/${projectId}/threads`)
+			const resp = await back.get(`/projects/${repositoryId}/threads`)
 			this.setState({ threads: resp.data })
 		} catch (error) {
 			alert("Erro ao consultar as threads do projeto")
@@ -68,7 +68,7 @@ class Threads extends Component {
 
 		const data = {
 				name: newThreadName,
-				projectId: this.state.projectId
+				repositoryId: this.state.repositoryId
 		}
 
     this.setState({ threadName: '' })
@@ -82,7 +82,7 @@ class Threads extends Component {
 
 	render() {
 		const { classes } = this.props
-    const projectId = this.props.match.params.projectId
+    const repositoryId = this.props.match.params.repositoryId
     
     console.log(this.state.threads)
 		return (
@@ -106,7 +106,7 @@ class Threads extends Component {
 					{this.state.threads.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).map((thread, id) => {
 
 						return (
-							<Link to={`/projects/` + projectId + `/threads/` + thread._id + `/chat`} className={classes.normalLink}>
+							<Link to={`/projects/` + repositoryId + `/threads/` + thread._id + `/chat`} className={classes.normalLink}>
 								<ListItem button>
 									<ListItemText primary={thread.name} />
 								</ListItem>

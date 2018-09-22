@@ -21,8 +21,8 @@ class Chat extends Component {
 
   async getThread(){
     const threadId = this.props.match.params.threadId
-    const projectId = this.props.match.params.projectId
-    const resp = await back.get(`/projects/${projectId}/threads/${threadId}`)
+    const repositoryId = this.props.match.params.repositoryId
+    const resp = await back.get(`/projects/${repositoryId}/threads/${threadId}`)
     this.setState({ thread: resp.data[0], loading: false })
   }
 

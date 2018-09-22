@@ -28,12 +28,12 @@ class Project extends Component {
 
   async getUserRepositories() {
     this.setState({ repositories: [] })
-    const token = getUser()
+    const user = getUser()
 
     try {
       this.setState({ loading: true })
 
-      const resp = await back.get(`/repositories?token=${token}`)
+      const resp = await back.get(`/users/${user._id}/repositories`)
       this.setState({ repositories: resp.data })
 
       this.setState({ loading: false })

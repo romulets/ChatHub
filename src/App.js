@@ -29,8 +29,8 @@ class App extends Component {
        <div>
         <LoggedTemplate>
           <Route exact path="/projects" component={Projects} />
-          <Route exact path="/projects/:projectId/threads" component={Threads} />
-          <Route exact path="/projects/:projectId/threads/:threadId/chat" component={Chat} />
+          <Route exact path="/projects/:repositoryId/threads" component={Threads} />
+          <Route exact path="/projects/:repositoryId/threads/:threadId/chat" component={Chat} />
         </LoggedTemplate>
        </div>
 
