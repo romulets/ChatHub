@@ -103,10 +103,9 @@ class Threads extends Component {
         
 
 				<List>
-					{this.state.threads.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).map((thread, id) => {
-
+					{this.state.threads.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).map((thread, idx) => {
 						return (
-							<Link to={`/projects/` + repositoryId + `/threads/` + thread._id + `/chat`} className={classes.normalLink}>
+							<Link to={`/projects/` + repositoryId + `/threads/` + thread._id + `/chat`} className={classes.normalLink} key={idx}>
 								<ListItem button>
 									<ListItemText primary={thread.name} />
 								</ListItem>

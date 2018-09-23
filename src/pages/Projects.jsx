@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
 import back from '../requests/back';
 import { getUser } from '../login/login-service';
-import { List, ListItem, ListItemText, Typography, withStyles } from '@material-ui/core';
+import { List, ListItem, ListItemText, Typography, withStyles, CircularProgress } from '@material-ui/core';
 
 const styles = theme => ({
   normalLink: {
@@ -50,7 +50,7 @@ class Project extends Component {
 
   render() {
     if (this.state.loading) {
-      return <Typography variant="body1">Carregando</Typography>
+      return <CircularProgress />
     }
 
     const { classes } = this.props
@@ -61,9 +61,8 @@ class Project extends Component {
 
         <List>
           {this.state.repositories.map((repo, idx) => {
-            console.log(repo)
             return (
-              <Link to={`/projects/${repo._id}/threads`} className={classes.normalLink}>
+              <Link to={`/projects/${repo._id}/threads`} className={classes.normalLink} key={idx}>
                 <ListItem key={idx} button>
                   <ListItemText primary={repo.name} />
                 </ListItem>
