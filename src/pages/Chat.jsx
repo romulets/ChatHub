@@ -192,7 +192,7 @@ class Chat extends Component {
           <Button variant="outlined" className={classes.buttonCenter} >Load older messages</Button>
 
           {this.state.messages.map((message, idx) => (
-            <Card key={idx} className={[classes.messageCard, idx % 2 == 0 ? classes.sentByMe : '']}>
+            <Card key={idx} className={[classes.messageCard, idx % 2 == 0 ? classes.sentByMe : ''].join(' ')}>
             <CardHeader subheader={message.user.username + ' - ' + message.user.name} className={classes.messageHeader}/>
               <CardContent className={classes.messageContent}>
                 <Typography component="p">{message.content}</Typography>
