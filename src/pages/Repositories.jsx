@@ -10,7 +10,7 @@ const styles = theme => ({
   }
 })
 
-class Project extends Component {
+class Repository extends Component {
 
   state = {
     repositories: [],
@@ -38,7 +38,7 @@ class Project extends Component {
 
       this.setState({ loading: false })
     } catch (error) {
-      alert('Usuário não existe')
+      alert('User does not exists')
 
       this.setState({ loading: false })
     }
@@ -57,12 +57,12 @@ class Project extends Component {
 
     return (
       <div>
-        <Typography variant="title">Your Projects</Typography>
+        <Typography variant="title">Your Repositories</Typography>
 
         <List>
           {this.state.repositories.map((repo, idx) => {
             return (
-              <Link to={`/projects/${repo._id}/threads`} className={classes.normalLink} key={idx}>
+              <Link to={`/repositories/${repo._id}/threads`} className={classes.normalLink} key={idx}>
                 <ListItem key={idx} button>
                   <ListItemText primary={repo.name} />
                 </ListItem>
@@ -76,4 +76,4 @@ class Project extends Component {
 
 }
 
-export default withStyles(styles)(Project);
+export default withStyles(styles)(Repository);

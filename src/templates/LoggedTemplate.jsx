@@ -196,12 +196,12 @@ class Dashboard extends React.Component {
             
             <Divider />
             <List>
-              <Link to="/projects" className={classes.menuItem}>
+              <Link to="/repositories" className={classes.menuItem}>
                 <ListItem button>
                   <ListItemIcon>
                     <InboxIcon />
                   </ListItemIcon>
-                  <ListItemText primary="Your Projects" />
+                  <ListItemText primary="Your Repositories" />
                 </ListItem>
               </Link>
             </List>

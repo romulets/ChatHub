@@ -49,7 +49,7 @@ const styles = theme => ({
 
 class SignIn extends Component {
 
-  GITHUB_CLIENT_ID = '06769512846394835010'
+  GITHUB_CLIENT_ID = window.location.hostname === 'localhost' ? 'd8fac4c3209c24213a83' : '06769512846394835010'
 
   render() {
     const { classes } = this.props

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Route } from "react-router-dom";
-import Projects from './pages/Projects';
+import Repositories from './pages/Repositories';
 import Threads from './pages/Threads';
 import Chat from './pages/Chat';
 import Login from './pages/Login/Login';
@@ -28,9 +28,9 @@ class App extends Component {
 
        <div>
         <LoggedTemplate>
-          <Route exact path="/projects" component={Projects} />
-          <Route exact path="/projects/:repositoryId/threads" component={Threads} />
-          <Route exact path="/projects/:repositoryId/threads/:threadId/chat" component={Chat} />
+          <Route exact path="/repositories" component={Repositories} />
+          <Route exact path="/repositories/:repositoryId/threads" component={Threads} />
+          <Route exact path="/repositories/:repositoryId/threads/:threadId/chat" component={Chat} />
         </LoggedTemplate>
        </div>
 
