@@ -1,9 +1,11 @@
 import React, { Component, } from 'react'
-import { withStyles, Typography, Button, TextField, CircularProgress, Card, CardContent, CardHeader } from '@material-ui/core';
+import { withStyles, Typography, Button, TextField, CircularProgress, Card, CardContent, CardHeader, InputAdornment, FormControl, Input } from '@material-ui/core';
 import back from '../requests/back';
 import { getUser } from '../login/login-service';
 import IconButton from '@material-ui/core/IconButton';
 import EditIcon from '@material-ui/icons/Edit';
+import SearchIcon from '@material-ui/icons/Search';
+import Highlighter from 'react-highlight-words'
 
 const styles = theme => ({
   chatArea: {
@@ -27,7 +29,8 @@ const styles = theme => ({
     width: '100%',
     padding: '5px 10px',
     border: '1px solid #efefef',
-    alignItems: 'center'
+    alignItems: 'center',
+    justifyContent: 'space-between'
   },
   messagesContainer: {
     display: 'block',
@@ -80,6 +83,8 @@ class Chat extends Component {
     thread: null,
     messages: [],
     messageContent: '',
+    searchText: '',
+    searchedText: '',
     loading: true,
     loadingMessages: false,
     editingName: false
@@ -97,6 +102,8 @@ class Chat extends Component {
     this.editName = this.editName.bind(this)
     this.updateThreadName = this.updateThreadName.bind(this)
     this.stopEditName = this.stopEditName.bind(this)
+    this.search = this.search.bind(this)
+    this.updateSearchText = this.updateSearchText.bind(this)
   }
 
   async componentDidMount() {
@@ -119,6 +126,10 @@ class Chat extends Component {
   }
 
   async getNextMessages() {
+    if (this.state.searchedText.trim() > 0) {
+      return
+    }
+
     const { messages: msgs } = this.state
 
     const { repositoryId, threadId } = this.props.match.params
@@ -248,8 +259,33 @@ class Chat extends Component {
     return true
   }
 
+  updateSearchText(evt) {
+    this.setState({ searchText: evt.target.value })
+  }
+
+  async search() {
+    const { searchText, searchedText } = this.state
+    
+    if (searchText.trim().length === 0) {
+      if (searchedText.trim().length > 0) {
+        this.setState({searchedText: ''})
+        this.getMessages()
+      }
+      return
+    }
+
+    if (searchText === searchedText) {
+      return
+    }
+
+    const { repositoryId, threadId } = this.props.match.params
+    this.setState({messages: [], loadingMessages: true})
+    const resp = await back.get(`/repositories/${repositoryId}/threads/${threadId}/messages?search=${searchText}`)
+    this.setState({messages: resp.data, searchedText: searchText, loadingMessages: false})
+  }
+
   render() {
-    const { editingName, thread, loadingMessages, hasMoreMessages, messages, repository } = this.state
+    const { editingName, thread, loadingMessages, hasMoreMessages, messages, repository, searchedText } = this.state
 
     if (this.state.loading && !this.state.editingName) {
       return (
@@ -263,8 +299,8 @@ class Chat extends Component {
         <div className={classes.chatArea}>
           <div className={classes.messagesHeader}>
 
-            <Typography variant="subheading">
-              {repository.name} -
+            <Typography variant="body1">
+              {repository.name}
             </Typography>
 
 
@@ -288,21 +324,50 @@ class Chat extends Component {
                   )}
                 </Typography>
               )}
+
+            <FormControl>
+              <Input
+                id="search"
+                placeholder="Search...  "
+                onKeyPress={(evt) => evt.key.toLowerCase() === 'enter' ? this.search() : null }
+                onChange={this.updateSearchText}
+                endAdornment={
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="Search"
+                      onClick={this.search}
+                    >
+                      <SearchIcon />
+                    </IconButton>
+                  </InputAdornment>
+                }
+              />
+            </FormControl>
           </div>
 
           <div className={classes.messagesContainer} id="messagesContainer">
 
-            {loadingMessages ?
-              <CircularProgress className={classes.buttonCenter} /> :
-              hasMoreMessages ?
-                <Button variant="outlined" className={classes.buttonCenter} onClick={this.loadOlderMessages} >Load older messages</Button> :
-                <Typography component="p" className={classes.buttonCenter}>No more messages.</Typography>}
+            {searchedText.trim().length > 0 ? 
+              <Typography component="p" className={classes.buttonCenter}>Searching for '{searchedText}'</Typography> :
+                loadingMessages ?
+                <CircularProgress className={classes.buttonCenter} /> :
+                hasMoreMessages ?
+                  <Button variant="outlined" className={classes.buttonCenter} onClick={this.loadOlderMessages} >Load older messages</Button> :
+                  <Typography component="p" className={classes.buttonCenter}>No more messages.</Typography>}
 
             {messages.map((message, idx) => (
               <Card key={idx} className={[classes.messageCard, message.user.githubId === this.loggedUser.githubId ? classes.sentByMe : ''].join(' ')}>
                 <CardHeader subheader={`${message.user.username} - ${message.sentAt.toLocaleString()}`} className={classes.messageHeader} />
                 <CardContent className={classes.messageContent}>
-                  <Typography component="p">{message.content}</Typography>
+                  <Typography component="p">
+                    {searchedText.trim().length === 0 ? message.content : (
+                      <Highlighter 
+                        searchWords={[searchedText.trim()]}
+                        autoEscape={true}
+                        textToHighlight={message.content}
+                      />
+                    )}
+                  </Typography>
                 </CardContent>
               </Card>
             ))}
