@@ -1,8 +1,6 @@
 import React, { Component, } from 'react'
 import { withStyles, Typography, Button, TextField, CircularProgress, Card, CardContent, CardHeader } from '@material-ui/core';
 import back from '../requests/back';
-import io from 'socket.io-client'
-import { Socket } from 'net';
 import { getUser } from '../login/login-service';
 
 const styles = theme => ({
@@ -99,26 +97,36 @@ class Chat extends Component {
     this.setState({ loading: true })
     await this.getThread()
     await this.getMessages()
-    this.connectSocket()
+    this.startPooling()
 
     this.loggedUser = getUser()
+    delete this.loggedUser.repositories
+    delete this.loggedUser.url
+    delete this.loggedUser.avatarUrl
+
     this.setState({ loading: false })
   }
 
-  connectSocket () {
-    this.socket = io.connect('http://localhost:3200')
-    const { threadId } = this.props.match.params
-
-    this.socket.on(`message:${threadId}`, message => {
-      const { messages } = this.state
-      messages.push(message)
-      this.setState({ messages })
-      this.scrollMessagesContainerBottom()
-    })
+  startPooling () {
+    setInterval(this.getNextMessages.bind(this), 10000)
   }
 
-  componentWillUnmount () {
-      this.socket.disconnect()
+  async getNextMessages() {
+    const {messages: msgs} = this.state 
+
+    const { repositoryId, threadId } = this.props.match.params
+    const lastMsg = msgs[msgs.length - 1]
+    const timestamp = lastMsg? new Date(lastMsg.savedAt) : new Date()
+    const resp = await back.get(`/repositories/${repositoryId}/threads/${threadId}/messages/next/${timestamp.getTime()}`)
+
+    if (resp.data.length > 0) {
+      this.setState({
+        hasMoreMessages: resp.data.length === 20,
+        messages: this.state.messages.concat(resp.data)
+      })
+  
+      this.scrollMessagesContainerBottom()
+    }
   }
 
   sendMessageThroughKeyEnter (event) {
@@ -171,29 +179,28 @@ class Chat extends Component {
     })
 
     this.setState({ loadingMessages: false })
+    this.scrollMessagesContainerBottom()
   }
 
   updateMessage (event) {
     this.setState({ message: event.target.value })
   }
 
-  sendMessage () {
+  async sendMessage () {
     const { messages, message: messageContent } = this.state
-    const { threadId } = this.props.match.params
+    const { threadId, repositoryId } = this.props.match.params
 
     if (!messageContent || messageContent.trim().length === 0) {
         return
     }
     
     const message = {
-        threadId,
-        user: this.loggedUser,
-        content: messageContent.trim(),
-        sentAt: new Date(),
+      user: this.loggedUser,
+      content: messageContent.trim(),
+      sentAt: new Date(),
     }  
-
-    this.socket.emit('message:sent', message)
-    messages.push(message)
+    const resp = await back.post(`/repositories/${repositoryId}/threads/${threadId}/messages`, message)
+    messages.push(resp.data)
     this.setState({ message: '', messages })
     this.scrollMessagesContainerBottom()
 }
