@@ -4,6 +4,8 @@ import back from '../requests/back';
 import io from 'socket.io-client'
 import { Socket } from 'net';
 import { getUser } from '../login/login-service';
+import IconButton from '@material-ui/core/IconButton';
+import EditIcon from '@material-ui/icons/Edit';
 
 const styles = theme => ({
   chatArea: {
@@ -84,7 +86,7 @@ class Chat extends Component {
     editingName: false
   }
 
-  constructor(props){
+  constructor(props) {
     super(props)
 
     this.getThread = this.getThread.bind(this)
@@ -93,9 +95,12 @@ class Chat extends Component {
     this.sendMessage = this.sendMessage.bind(this)
     this.sendMessageThroughKeyEnter = this.sendMessageThroughKeyEnter.bind(this)
     this.loadOlderMessages = this.loadOlderMessages.bind(this)
+    this.editName = this.editName.bind(this)
+    this.updateThreadName = this.updateThreadName.bind(this)
+    this.stopEditName = this.stopEditName.bind(this)
   }
 
-  async componentDidMount(){
+  async componentDidMount() {
     this.setState({ loading: true })
     await this.getThread()
     await this.getMessages()
@@ -105,7 +110,7 @@ class Chat extends Component {
     this.setState({ loading: false })
   }
 
-  connectSocket () {
+  connectSocket() {
     this.socket = io.connect('http://localhost:3200')
     const { threadId } = this.props.match.params
 
@@ -117,28 +122,28 @@ class Chat extends Component {
     })
   }
 
-  componentWillUnmount () {
-      this.socket.disconnect()
+  componentWillUnmount() {
+    this.socket.disconnect()
   }
 
-  sendMessageThroughKeyEnter (event) {
-      if (event.key !== 'Enter' || event.shiftKey) {
-          return
-      }
+  sendMessageThroughKeyEnter(event) {
+    if (event.key !== 'Enter' || event.shiftKey) {
+      return
+    }
 
-      event.preventDefault()
-      this.sendMessage()
-      return false
+    event.preventDefault()
+    this.sendMessage()
+    return false
   }
 
   scrollMessagesContainerBottom() {
     setTimeout(() => {
-        const objDiv = document.getElementById('messagesContainer')
-        objDiv.scrollTop = objDiv.scrollHeight
+      const objDiv = document.getElementById('messagesContainer')
+      objDiv.scrollTop = objDiv.scrollHeight
     }, 20)
-}
+  }
 
-  async getThread(){
+  async getThread() {
     const { repositoryId, threadId } = this.props.match.params
     const resp = await back.get(`/repositories/${repositoryId}/threads/${threadId}`)
     this.setState({ thread: resp.data })
@@ -173,84 +178,117 @@ class Chat extends Component {
     this.setState({ loadingMessages: false })
   }
 
-  updateMessage (event) {
+  updateMessage(event) {
     this.setState({ message: event.target.value })
   }
 
-  sendMessage () {
+  sendMessage() {
     const { messages, message: messageContent } = this.state
     const { threadId } = this.props.match.params
 
     if (!messageContent || messageContent.trim().length === 0) {
-        return
+      return
     }
-    
+
     const message = {
-        threadId,
-        user: this.loggedUser,
-        content: messageContent.trim(),
-        sentAt: new Date(),
-    }  
+      threadId,
+      user: this.loggedUser,
+      content: messageContent.trim(),
+      sentAt: new Date(),
+    }
 
     this.socket.emit('message:sent', message)
     messages.push(message)
     this.setState({ message: '', messages })
     this.scrollMessagesContainerBottom()
-}
-
-
-  async updateThreadName(){
-
   }
 
-  editName(){
-    this.setState({editingName:true})
+
+  async updateThreadName(e) {
+    const { thread } = this.state
+    thread.name = e.target.value
+    this.setState({ thread })
+  }
+
+  editName() {
+    this.setState({ editingName: true })
+  }
+
+  async stopEditName(e) {
+    
+    if(e.key == "Enter"){
+      const { repositoryId } = this.props.match.params
+      console.log(repositoryId)
+      console.log(this.state.thread)
+      await back.post(`repositories/${repositoryId}/threads/${this.state.thread._id}`, this.state.thread)
+      this.setState({ editingName: false })
+      return false
+    }
+    return true
   }
 
   render() {
-    if(this.state.loading && !this.state.editingName){
+    if (this.state.loading && !this.state.editingName) {
       return (
         <div>
           <CircularProgress />
         </div>
       )
-    }else if(!this.state.editingName){
+    } else {
       const { classes } = this.props
       return (
         <div className={classes.chatArea}>
           <div className={classes.messagesHeader}>
-            <Typography variant="title">{this.state.thread.name} </Typography>
+
+            {(this.state.editingName) ? (
+              <Typography variant="title">
+                <TextField className={classes.threadNameField}
+                  id="threadName"
+                  margin="normal"
+                  onChange={this.updateThreadName}
+                  onKeyPress={this.stopEditName}
+                  value={this.state.thread.name}
+                  error={this.state.thread.name.trim().length === 0} />
+              </Typography>
+            ) : (
+                <Typography variant="title">
+                  {this.state.thread.name}
+                  <IconButton onClick={this.editName}>
+                    <EditIcon />
+                  </IconButton>
+                </Typography>
+              )}
           </div>
 
           <div className={classes.messagesContainer} id="messagesContainer">
-          
-          { this.state.loadingMessages ? 
-            <CircularProgress className={classes.buttonCenter} /> :
-                this.state.hasMoreMessages ? 
+
+            {this.state.loadingMessages ?
+              <CircularProgress className={classes.buttonCenter} /> :
+              this.state.hasMoreMessages ?
                 <Button variant="outlined" className={classes.buttonCenter} onClick={this.loadOlderMessages} >Load older messages</Button> :
                 <Typography component="p" className={classes.buttonCenter}>No more messages.</Typography>}
 
-          {this.state.messages.map((message, idx) => (
-            <Card key={idx} className={[classes.messageCard, message.user.githubId === this.loggedUser.githubId ? classes.sentByMe : ''].join(' ')}>
-            <CardHeader subheader={`${message.user.username} - ${message.sentAt.toLocaleString()}`} className={classes.messageHeader}/>
-              <CardContent className={classes.messageContent}>
-                <Typography component="p">{message.content}</Typography>
-              </CardContent>
-            </Card>
-          ))}
+            {this.state.messages.map((message, idx) => (
+              <Card key={idx} className={[classes.messageCard, message.user.githubId === this.loggedUser.githubId ? classes.sentByMe : ''].join(' ')}>
+                <CardHeader subheader={`${message.user.username} - ${message.sentAt.toLocaleString()}`} className={classes.messageHeader} />
+                <CardContent className={classes.messageContent}>
+                  <Typography component="p">{message.content}</Typography>
+                </CardContent>
+              </Card>
+            ))}
 
           </div>
 
 
           <div className={classes.messageFieldContainer}>
-            <TextField className={classes.messageField} placeholder='Type your message here...' onChange={this.updateMessage} onKeyPress={this.sendMessageThroughKeyEnter} value={this.state.message}/>
+            <TextField className={classes.messageField} placeholder='Type your message here...' onChange={this.updateMessage} onKeyPress={this.sendMessageThroughKeyEnter} value={this.state.message} />
             <Button variant="contained" color="primary" className={classes.messageSend} onClick={this.sendMessage}>Enviar</Button>
           </div>
 
         </div>
       )
     }
-    
+
   }
 
 }

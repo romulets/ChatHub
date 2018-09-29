@@ -7,7 +7,7 @@ export default class SignInCallback extends Component {
 
   async componentDidMount() {
     const { code } = queryString.parse(this.props.location.search)
-
+    
     if (hasUser()) {
       return
     }
