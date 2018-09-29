@@ -22,11 +22,12 @@ const styles = theme => ({
   },
   messagesHeader: {
     background: '#efefef',
-    display: 'block',
+    display: 'flex',
     height: '40px',
     width: '100%',
     padding: '5px 10px',
-    border: '1px solid #efefef'
+    border: '1px solid #efefef',
+    alignItems: 'center'
   },
   messagesContainer: {
     display: 'block',
@@ -100,6 +101,7 @@ class Chat extends Component {
 
   async componentDidMount() {
     this.setState({ loading: true })
+    await this.getRepository()
     await this.getThread()
     await this.getMessages()
     this.startPooling()
@@ -112,16 +114,16 @@ class Chat extends Component {
     this.setState({ loading: false })
   }
 
-  startPooling () {
+  startPooling() {
     setInterval(this.getNextMessages.bind(this), 10000)
   }
 
   async getNextMessages() {
-    const {messages: msgs} = this.state 
+    const { messages: msgs } = this.state
 
     const { repositoryId, threadId } = this.props.match.params
     const lastMsg = msgs[msgs.length - 1]
-    const timestamp = lastMsg? new Date(lastMsg.savedAt) : new Date()
+    const timestamp = lastMsg ? new Date(lastMsg.savedAt) : new Date()
     const resp = await back.get(`/repositories/${repositoryId}/threads/${threadId}/messages/next/${timestamp.getTime()}`)
 
     if (resp.data.length > 0) {
@@ -129,7 +131,7 @@ class Chat extends Component {
         hasMoreMessages: resp.data.length === 20,
         messages: this.state.messages.concat(resp.data)
       })
-  
+
       this.scrollMessagesContainerBottom()
     }
   }
@@ -149,6 +151,18 @@ class Chat extends Component {
       const objDiv = document.getElementById('messagesContainer')
       objDiv.scrollTop = objDiv.scrollHeight
     }, 20)
+  }
+
+  async getRepository() {
+    const repositoryId = this.props.match.params.repositoryId
+    const user = getUser()
+
+    try {
+      const resp = await back.get(`users/${user._id}/repositories/${repositoryId}`)
+      this.setState({ repository: resp.data })
+    } catch (error) {
+      alert("Error on fetch the repositories")
+    }
   }
 
   async getThread() {
@@ -191,7 +205,7 @@ class Chat extends Component {
     this.setState({ message: event.target.value })
   }
 
-  async sendMessage () {
+  async sendMessage() {
     const { messages, message: messageContent } = this.state
     const { threadId, repositoryId } = this.props.match.params
 
@@ -203,7 +217,7 @@ class Chat extends Component {
       user: this.loggedUser,
       content: messageContent.trim(),
       sentAt: new Date(),
-    }  
+    }
     const resp = await back.post(`/repositories/${repositoryId}/threads/${threadId}/messages`, message)
     messages.push(resp.data)
     this.setState({ message: '', messages })
@@ -222,8 +236,8 @@ class Chat extends Component {
   }
 
   async stopEditName(e) {
-    
-    if(e.key === "Enter"){
+
+    if (e.key === "Enter") {
       const { repositoryId } = this.props.match.params
       console.log(repositoryId)
       console.log(this.state.thread)
@@ -235,6 +249,8 @@ class Chat extends Component {
   }
 
   render() {
+    const { editingName, thread, loadingMessages, hasMoreMessages, messages, repository } = this.state
+
     if (this.state.loading && !this.state.editingName) {
       return (
         <div>
@@ -247,35 +263,42 @@ class Chat extends Component {
         <div className={classes.chatArea}>
           <div className={classes.messagesHeader}>
 
-            {(this.state.editingName) ? (
+            <Typography variant="subheading">
+              {repository.name} -
+            </Typography>
+
+
+            {(editingName) ? (
               <Typography variant="title">
                 <TextField className={classes.threadNameField}
                   id="threadName"
                   margin="normal"
                   onChange={this.updateThreadName}
                   onKeyPress={this.stopEditName}
-                  value={this.state.thread.name}
-                  error={this.state.thread.name.trim().length === 0} />
+                  value={thread.name}
+                  error={thread.name.trim().length === 0} />
               </Typography>
             ) : (
                 <Typography variant="title">
-                  {this.state.thread.name}
-                  <IconButton onClick={this.editName}>
-                    <EditIcon />
-                  </IconButton>
+                  {thread.name}
+                  {thread.main ? null : (
+                    <IconButton onClick={this.editName}>
+                      <EditIcon />
+                    </IconButton>
+                  )}
                 </Typography>
               )}
           </div>
 
           <div className={classes.messagesContainer} id="messagesContainer">
 
-            {this.state.loadingMessages ?
+            {loadingMessages ?
               <CircularProgress className={classes.buttonCenter} /> :
-              this.state.hasMoreMessages ?
+              hasMoreMessages ?
                 <Button variant="outlined" className={classes.buttonCenter} onClick={this.loadOlderMessages} >Load older messages</Button> :
                 <Typography component="p" className={classes.buttonCenter}>No more messages.</Typography>}
 
-            {this.state.messages.map((message, idx) => (
+            {messages.map((message, idx) => (
               <Card key={idx} className={[classes.messageCard, message.user.githubId === this.loggedUser.githubId ? classes.sentByMe : ''].join(' ')}>
                 <CardHeader subheader={`${message.user.username} - ${message.sentAt.toLocaleString()}`} className={classes.messageHeader} />
                 <CardContent className={classes.messageContent}>

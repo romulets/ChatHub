@@ -2,10 +2,11 @@ import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
 import { withStyles, ListItem, ListItemText, Typography, List, Button, TextField, Snackbar, CircularProgress } from '@material-ui/core';
 import back from '../requests/back';
+import { getUser } from '../login/login-service';
 
 const styles = theme => ({
-	normalLink: {
-		textDecoration: 'none'
+  normalLink: {
+    textDecoration: 'none'
   },
   threadNameField: {
     width: '50%',
@@ -15,104 +16,113 @@ const styles = theme => ({
 
 class Threads extends Component {
 
-	state = {
+  state = {
     threads: [],
     threadName: '',
-    repositoryId: 0,
+    repository: undefined,
     snackbarIsOpen: false,
     snackbarMessage: ''
-	}
+  }
 
-	props = {}
+  props = {}
 
-	constructor(props) {
-		super(props)
-		this.props = props
-		this.getRepositoryThreads = this.getRepositoryThreads.bind(this)
+  constructor(props) {
+    super(props)
+    this.props = props
+    this.getRepositoryThreads = this.getRepositoryThreads.bind(this)
     this.newThread = this.newThread.bind(this)
     this.updateThreadName = this.updateThreadName.bind(this)
-	}
-
-	componentDidMount() {
-		this.getRepositoryThreads()
   }
-  
-  updateThreadName ({target: { value }}) {
-    this.setState({threadName: value})
+
+  async componentDidMount() {
+    await this.getRepository()
+    await this.getRepositoryThreads()
+  }
+
+  updateThreadName({ target: { value } }) {
+    this.setState({ threadName: value })
   }
 
   openSnackbar(snackbarMessage) {
-    this.setState({snackbarIsOpen: true, snackbarMessage })
+    this.setState({ snackbarIsOpen: true, snackbarMessage })
   }
 
-	async getRepositoryThreads() {
-		const repositoryId = this.props.match.params.repositoryId
+  async getRepository() {
+    const repositoryId = this.props.match.params.repositoryId
+    const user = getUser()
 
-		this.setState({ threads: [], repositoryId: repositoryId })
+    try {
+      const resp = await back.get(`users/${user._id}/repositories/${repositoryId}`)
+      this.setState({ repository: resp.data })
+    } catch (error) {
+      alert("Error on fetch the repositories")
+    }
+  }
 
-		try {
-			const resp = await back.get(`/repositories/${repositoryId}/threads`)
-			this.setState({ threads: resp.data })
-		} catch (error) {
-			alert("Error on fetch the threads' repositories")
-		}
-	}
+  async getRepositoryThreads() {
+    this.setState({ threads: [] })
 
-	async newThread(){
+    try {
+      const resp = await back.get(`/repositories/${this.state.repository._id}/threads`)
+      this.setState({ threads: resp.data })
+    } catch (error) {
+      alert("Error on fetch the threads' repositories")
+    }
+  }
+
+  async newThread() {
     const newThreadName = (this.state.threadName || '').trim()
-    
+
     if (newThreadName.length === 0) {
       this.openSnackbar('Please provide a valid thread name')
       return
     }
 
-		const data = {
-				name: newThreadName,
-				repositoryId: this.state.repositoryId
-		}
+    const data = {
+      name: newThreadName,
+      repositoryId: this.state.repository._id
+    }
 
     this.setState({ threadName: '' })
     this.openSnackbar('Saving thread')
 
-    const repositoryId = this.props.match.params.repositoryId
-
-		await back.post(`repositories/${repositoryId}/threads`, data)
+    await back.post(`repositories/${this.state.repository._id}/threads`, data)
     await this.getRepositoryThreads()
-    
+
     this.openSnackbar('Thread saved!')
-	}
+  }
 
-	render() {
-		const { classes } = this.props
-    const repositoryId = this.props.match.params.repositoryId
-    
+  render() {
+    const { classes } = this.props
+
     const threadName = this.state.threadName || ''
-		return (
-			<div>
-				<Typography variant="title">Threads </Typography>
+    const { repository } = this.state
+    return (
+      <div>
+        <Typography variant="title">{repository ? repository.name + "'s" : ''} Threads </Typography>
 
-        
-          <TextField 
-            className={classes.threadNameField} 
-            id="threadName" 
-            label="New thread name" 
-            margin="normal" 
-            onChange={this.updateThreadName} 
-            value={threadName}
-            error={threadName.trim().length === 0} /> 
 
-          <Button variant="contained" color="primary" onClick={this.newThread}>Create new thread</Button>
+        <TextField
+          className={classes.threadNameField}
+          id="threadName"
+          label="New thread name"
+          margin="normal"
+          onChange={this.updateThreadName}
+          value={threadName}
+          error={threadName.trim().length === 0} />
+
+        <Button variant="contained" color="primary" onClick={this.newThread}>Create new thread</Button>
 
         {
           ((threads) => {
             if (threads.length === 0) {
-              return <CircularProgress style={{display: 'block'}}/>
+              return <CircularProgress style={{ display: 'block' }} />
             } else {
               return (
                 <List>
-                  {this.state.threads.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).map((thread, idx) => {
+                  {this.state.threads.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).map((thread, idx) => {
                     return (
-                      <Link to={`/repositories/` + repositoryId + `/threads/` + thread._id + `/chat`} className={classes.normalLink} key={idx}>
+                      <Link to={`/repositories/` + repository._id + `/threads/` + thread._id + `/chat`} className={classes.normalLink} key={idx}>
                         <ListItem button>
                           <ListItemText primary={thread.name} />
                         </ListItem>
@@ -127,7 +137,7 @@ class Threads extends Component {
           })(this.state.threads || [])
         }
 
-          <Snackbar
+        <Snackbar
           anchorOrigin={{
             vertical: 'bottom',
             horizontal: 'left',
@@ -139,9 +149,9 @@ class Threads extends Component {
             'aria-describedby': 'message-id',
           }}
           message={this.state.snackbarMessage} />
-			</div>
-		)
-	}
+      </div>
+    )
+  }
 
 }
 
