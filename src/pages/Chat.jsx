@@ -356,8 +356,8 @@ class Chat extends Component {
                   <Typography component="p" className={classes.buttonCenter}>No more messages.</Typography>}
 
             {messages.map((message, idx) => (
-              <Card key={idx} className={[classes.messageCard, message.user.githubId === this.loggedUser.githubId ? classes.sentByMe : ''].join(' ')}>
-                <CardHeader subheader={`${message.user.username} - ${message.sentAt.toLocaleString()}`} className={classes.messageHeader} />
+              <Card key={idx} className={[classes.messageCard, message.user != null && message.user.githubId === this.loggedUser.githubId ? classes.sentByMe : ''].join(' ')}>
+                <CardHeader subheader={`${message.user == null ? "GitHub" : message.user.username} - ${message.sentAt.toLocaleString()}`} className={classes.messageHeader} />
                 <CardContent className={classes.messageContent}>
                   <Typography component="p">
                     {searchedText.trim().length === 0 ? message.content : (
