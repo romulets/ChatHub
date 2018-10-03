@@ -49,7 +49,13 @@ const styles = theme => ({
   },
   sentByMe: {
     marginLeft: 'calc(50% + 10px)',
-    background: 'rgba(81, 255, 118, 0.23)'
+    background: 'rgba(81, 255, 118, 0.23)',
+  },
+  sentByGithub:{
+    marginLeft: 'calc(35% + 5px)',
+    background: 'rgb(255, 242, 216)',
+    textAlign: 'center',
+    width: 'calc(30% - 10px)',
   },
   messageHeader: {
     padding: '5px'
@@ -356,7 +362,8 @@ class Chat extends Component {
                   <Typography component="p" className={classes.buttonCenter}>No more messages.</Typography>}
 
             {messages.map((message, idx) => (
-              <Card key={idx} className={[classes.messageCard, message.user != null && message.user.githubId === this.loggedUser.githubId ? classes.sentByMe : ''].join(' ')}>
+              (message.user != null) ? (
+              <Card key={idx} className={[classes.messageCard, message.user != null && message.user.githubId === this.loggedUser.githubId ? classes.sentByMe :  message.user == null ? classes.sentByGithub : ''].join(' ')}>
                 <CardHeader subheader={`${message.user == null ? "GitHub" : message.user.username} - ${message.sentAt.toLocaleString()}`} className={classes.messageHeader} />
                 <CardContent className={classes.messageContent}>
                   <Typography component="p">
@@ -369,8 +376,23 @@ class Chat extends Component {
                     )}
                   </Typography>
                 </CardContent>
-              </Card>
-            ))}
+              </Card>    
+              ) : (
+                <Card key={idx} className={[classes.messageCard, classes.sentByGithub].join(' ')}>
+                <CardContent className={classes.messageContent}>
+                  <Typography component="p">
+                    {searchedText.trim().length === 0 ? message.content : (
+                      <Highlighter 
+                        searchWords={[searchedText.trim()]}
+                        autoEscape={true}
+                        textToHighlight={message.content}
+                      />
+                    )}
+                  </Typography>
+                </CardContent>
+              </Card>    
+              )  
+          ))}
 
           </div>
 
