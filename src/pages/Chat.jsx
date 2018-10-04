@@ -93,7 +93,8 @@ class Chat extends Component {
     searchedText: '',
     loading: true,
     loadingMessages: false,
-    editingName: false
+    editingName: false,
+    sendingMessage: false
   }
 
   constructor(props) {
@@ -236,6 +237,8 @@ class Chat extends Component {
       return
     }
 
+    this.setState({sendingMessage: true})
+
     const message = {
       user: this.loggedUser,
       content: messageContent.trim(),
@@ -245,6 +248,8 @@ class Chat extends Component {
     messages.push(resp.data)
     this.setState({ message: '', messages })
     this.scrollMessagesContainerBottom()
+
+    this.setState({sendingMessage: false})
   }
 
 
@@ -404,8 +409,8 @@ class Chat extends Component {
 
 
           <div className={classes.messageFieldContainer}>
-            <TextField className={classes.messageField} placeholder='Type your message here...' onChange={this.updateMessage} onKeyPress={this.sendMessageThroughKeyEnter} value={this.state.message} />
-            <Button variant="contained" color="primary" className={classes.messageSend} onClick={this.sendMessage}>Enviar</Button>
+            <TextField disbaled={this.state.sendingMessage} className={classes.messageField} placeholder='Type your message here...' onChange={this.updateMessage} onKeyPress={this.sendMessageThroughKeyEnter} value={this.state.message} />
+            <Button disbaled={this.state.sendingMessage} variant="contained" color="primary" className={classes.messageSend} onClick={this.sendMessage}>Enviar</Button>
           </div>
 
         </div>
