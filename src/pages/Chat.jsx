@@ -51,7 +51,7 @@ const styles = theme => ({
     marginLeft: 'calc(50% + 10px)',
     background: 'rgba(81, 255, 118, 0.23)',
   },
-  sentByGithub:{
+  sentByGithub: {
     marginLeft: 'calc(35% + 5px)',
     background: 'rgb(255, 242, 216)',
     textAlign: 'center',
@@ -127,6 +127,12 @@ class Chat extends Component {
     this.setState({ loading: false })
   }
 
+  uniqueMessages(msgs) {
+    return msgs.filter((obj, pos, arr) => {
+      return arr.map(mapObj => mapObj['_id']).indexOf(obj[['_id']]) === pos
+    })
+  }
+
   startPooling() {
     setInterval(this.getNextMessages.bind(this), 10000)
   }
@@ -146,7 +152,7 @@ class Chat extends Component {
     if (resp.data.length > 0) {
       this.setState({
         hasMoreMessages: resp.data.length === 20,
-        messages: this.state.messages.concat(resp.data)
+        messages: this.uniqueMessages(this.state.messages.concat(resp.data))
       })
 
       this.scrollMessagesContainerBottom()
@@ -197,7 +203,7 @@ class Chat extends Component {
 
     this.setState({
       hasMoreMessages: resp.data.length === 20,
-      messages: resp.data.concat(this.state.messages)
+      messages: this.uniqueMessages(resp.data.concat(this.state.messages))
     })
 
     this.setState({ loadingMessages: false })
@@ -211,7 +217,7 @@ class Chat extends Component {
 
     this.setState({
       hasMoreMessages: resp.data.length === 20,
-      messages: resp.data
+      messages: this.uniqueMessages(resp.data)
     })
 
     this.setState({ loadingMessages: false })
@@ -271,10 +277,10 @@ class Chat extends Component {
 
   async search() {
     const { searchText, searchedText } = this.state
-    
+
     if (searchText.trim().length === 0) {
       if (searchedText.trim().length > 0) {
-        this.setState({searchedText: ''})
+        this.setState({ searchedText: '' })
         this.getMessages()
       }
       return
@@ -285,9 +291,9 @@ class Chat extends Component {
     }
 
     const { repositoryId, threadId } = this.props.match.params
-    this.setState({messages: [], loadingMessages: true})
+    this.setState({ messages: [], loadingMessages: true })
     const resp = await back.get(`/repositories/${repositoryId}/threads/${threadId}/messages?search=${searchText}`)
-    this.setState({messages: resp.data, searchedText: searchText, loadingMessages: false})
+    this.setState({ messages: resp.data, searchedText: searchText, loadingMessages: false })
   }
 
   render() {
@@ -335,7 +341,7 @@ class Chat extends Component {
               <Input
                 id="search"
                 placeholder="Search...  "
-                onKeyPress={(evt) => evt.key.toLowerCase() === 'enter' ? this.search() : null }
+                onKeyPress={(evt) => evt.key.toLowerCase() === 'enter' ? this.search() : null}
                 onChange={this.updateSearchText}
                 endAdornment={
                   <InputAdornment position="end">
@@ -353,9 +359,9 @@ class Chat extends Component {
 
           <div className={classes.messagesContainer} id="messagesContainer">
 
-            {searchedText.trim().length > 0 ? 
+            {searchedText.trim().length > 0 ?
               <Typography component="p" className={classes.buttonCenter}>Searching for '{searchedText}'</Typography> :
-                loadingMessages ?
+              loadingMessages ?
                 <CircularProgress className={classes.buttonCenter} /> :
                 hasMoreMessages ?
                   <Button variant="outlined" className={classes.buttonCenter} onClick={this.loadOlderMessages} >Load older messages</Button> :
@@ -363,36 +369,36 @@ class Chat extends Component {
 
             {messages.map((message, idx) => (
               (message.user != null) ? (
-              <Card key={idx} className={[classes.messageCard, message.user != null && message.user.githubId === this.loggedUser.githubId ? classes.sentByMe :  message.user == null ? classes.sentByGithub : ''].join(' ')}>
-                <CardHeader subheader={`${message.user == null ? "GitHub" : message.user.username} - ${message.sentAt.toLocaleString()}`} className={classes.messageHeader} />
-                <CardContent className={classes.messageContent}>
-                  <Typography component="p">
-                    {searchedText.trim().length === 0 ? message.content : (
-                      <Highlighter 
-                        searchWords={[searchedText.trim()]}
-                        autoEscape={true}
-                        textToHighlight={message.content}
-                      />
-                    )}
-                  </Typography>
-                </CardContent>
-              </Card>    
+                <Card key={idx} className={[classes.messageCard, message.user != null && message.user.githubId === this.loggedUser.githubId ? classes.sentByMe : message.user == null ? classes.sentByGithub : ''].join(' ')}>
+                  <CardHeader subheader={`${message.user == null ? "GitHub" : message.user.username} - ${message.sentAt.toLocaleString()}`} className={classes.messageHeader} />
+                  <CardContent className={classes.messageContent}>
+                    <Typography component="p">
+                      {searchedText.trim().length === 0 ? message.content : (
+                        <Highlighter
+                          searchWords={[searchedText.trim()]}
+                          autoEscape={true}
+                          textToHighlight={message.content}
+                        />
+                      )}
+                    </Typography>
+                  </CardContent>
+                </Card>
               ) : (
-                <Card key={idx} className={[classes.messageCard, classes.sentByGithub].join(' ')}>
-                <CardContent className={classes.messageContent}>
-                  <Typography component="p">
-                    {searchedText.trim().length === 0 ? message.content : (
-                      <Highlighter 
-                        searchWords={[searchedText.trim()]}
-                        autoEscape={true}
-                        textToHighlight={message.content}
-                      />
-                    )}
-                  </Typography>
-                </CardContent>
-              </Card>    
-              )  
-          ))}
+                  <Card key={idx} className={[classes.messageCard, classes.sentByGithub].join(' ')}>
+                    <CardContent className={classes.messageContent}>
+                      <Typography component="p">
+                        {searchedText.trim().length === 0 ? message.content : (
+                          <Highlighter
+                            searchWords={[searchedText.trim()]}
+                            autoEscape={true}
+                            textToHighlight={message.content}
+                          />
+                        )}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                )
+            ))}
 
           </div>
 
