@@ -6,6 +6,7 @@ import IconButton from '@material-ui/core/IconButton';
 import EditIcon from '@material-ui/icons/Edit';
 import SearchIcon from '@material-ui/icons/Search';
 import Highlighter from 'react-highlight-words'
+import { Link } from 'react-router-dom'
 
 const styles = theme => ({
   chatArea: {
@@ -378,19 +379,21 @@ class Chat extends Component {
                 </CardContent>
               </Card>    
               ) : (
-                <Card key={idx} className={[classes.messageCard, classes.sentByGithub].join(' ')}>
-                <CardContent className={classes.messageContent}>
-                  <Typography component="p">
-                    {searchedText.trim().length === 0 ? message.content : (
-                      <Highlighter 
-                        searchWords={[searchedText.trim()]}
-                        autoEscape={true}
-                        textToHighlight={message.content}
-                      />
-                    )}
-                  </Typography>
-                </CardContent>
-              </Card>    
+                <a href={message.url} target="_blank" style={{textDecoration:'none'}}>
+                  <Card key={idx} className={[classes.messageCard, classes.sentByGithub].join(' ')}>
+                  <CardContent className={classes.messageContent}>
+                    <Typography component="p">
+                      {searchedText.trim().length === 0 ? message.content : (
+                        <Highlighter 
+                          searchWords={[searchedText.trim()]}
+                          autoEscape={true}
+                          textToHighlight={message.content}
+                        />
+                      )}
+                    </Typography>
+                  </CardContent>
+                </Card>    
+              </a>
               )  
           ))}
 
